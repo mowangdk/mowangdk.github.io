@@ -29,7 +29,7 @@ description: 不知道这是杯具还是悲剧，反正就是可以假装下雨�
 
 ![Raining](/images/rainingchrome/rain.jpg)
 
-[BeiYuu]:    http://beiyuu.com  "BeiYuu"
+
 [1]:    {{ page.url}}  ({{ page.title }})
 [2]:    http://www.rainymood.com "Rainy Mood"
 [3]:    http://movie.douban.com/subject/7054120/ "黑镜"
