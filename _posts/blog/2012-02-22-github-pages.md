@@ -333,7 +333,7 @@ Google的高亮插件使用也比较方便，只需要在`<pre>`的标签上加�
 如果你跟着这篇不那么详尽的教程，成功搭建了自己的博客，恭喜你！剩下的就是保持热情的去写自己的文章吧。
 
 
-[BeiYuu]:    http://beiyuu.com  "BeiYuu"
+
 [Github]:   http://github.com "Github"
 [jQuery]:   https://github.com/jquery/jquery "jQuery@github"
 [Twitter]:  https://github.com/twitter/bootstrap "Twitter@github"
