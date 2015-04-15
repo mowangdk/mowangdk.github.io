@@ -4,7 +4,7 @@ title: hibernate
 category: project
 description: hibernate 学习笔记
 ---
-##其の一
+## ==&equals
 今天开始记录学习hibernate的笔记，首先补充一下以前的东西，==&equals  主要是因为hibernate的联合主键的问题，里面需要复写联合主键类的equals和hashcode方法
 于是想到了这个首先==是比较内存中对象的东西，主要是看两个对象是否是同一个对象的引用，而equals是object类的一个方法，在其内部也是复写了这个方法，但是由于object
 类是所有类的父类，所有继承他的类都存在equals方法，其中有的对象对这个类的方法进行了重写，加入了对内容的比较，比如说是String类
@@ -61,6 +61,16 @@ hashcode方法一般用户不会去调用，比如在hashmap中，由于key是�
 让他们的逻辑一致。举个例子，还是刚刚的例子，如果姓名和性别相等就算2个对象相等的话，那么hashcode的方法也要返回姓名的hashcode值加上性别的hashcode值，这样从逻辑上，他们就一致了。
 
 
-##其の二
-使用annotation来将id生成策略变成uuid，
+##使用annotation来将id生成策略变成uuid，
+
 首先在对应的实体类的表上面@GenericGenerator(name="****" , strategy="uuid")，然后在getId方法上写上GeneratedValue（generator="******"）,指定id的自定义生成策略
+
+
+##ORmapping映射一对一之双向关联，
+使用的是annotation，但是始终有一个地方不太理解，就是mappedBy这个注解，因为双向关联，所以两个表中如果不设置mappedby的话就是每个表都有一个外键，这样的确会照成数据冗余
+而且插入的时候可能还会报错，但是如果加上这个注解，就会变成一个外键，我生成了建表语句，观察了一下，这个建的表不是跟单项关联一样吗？？？于是在网上找了找答案：
+         加了mappedBy的话，只在Person里面加了外键。我们在IdCard类里有一个Person属性，当get或load一个IdCard的时候，hibernate看到了你在这个OneToOne里面加了一个mappedBy，
+         所以会去Person类对应的表里去找一个外键与你要get的IdCard的主键相同的记录，放到IdCard的person属性中。这样也就能根据IdCard来找到Peorson了，也就实现了所谓的双向关联。
+还是没太看懂......可能是数据库学的不太好吧。姑且先记上，回头有时间再说
+
+
