@@ -49,12 +49,14 @@ description: hibernate 学习笔记
  对于该类中的每个“关键”域，检查参数中的域是否与该对象中对应的域相匹配。如果这些测试全部成功，则返回true;否则返回false。
  当编写完成了equals方法之后，检查“对称性”、“传递性”、“一致性”。
  注意：
- •覆盖equals时总要覆盖hashCode 《Effective Java》作者说的
- •不要企图让equals方法过于只能。
- •不要将equals声明中的Object对象替换为其他的类型（因为这样我们并没有覆盖Object中的equals方法哦）
-每个覆盖equals 的方法都要覆盖hashcode方法，如果不这样做，会导致该类无法结合所有积蓄散列的集合一起正常运作，包括hashmap hashset hashtable
- •在应用程序的执行期间，只要对象的equals方法的比较操作所用到的信息没有被修改，那么对这同一个对象调用多次，hashCode方法都必须始终如一地返回同一个整数。在同一个应用程序的多次执行过程中，每次执行所返回的整数可以不一致。
- •如果两个对象根据equals()方法比较是相等的，那么调用这两个对象中任意一个对象的hashCode方法都必须产生同样的整数结果。
+ <ul>
+ <li>覆盖equals时总要覆盖hashCode 《Effective Java》作者说的</li>
+ <li>不要企图让equals方法过于只能。</li>
+ <li>不要将equals声明中的Object对象替换为其他的类型（因为这样我们并没有覆盖Object中的equals方法哦）</li>
+ <li>每个覆盖equals 的方法都要覆盖hashcode方法，如果不这样做，会导致该类无法结合所有积蓄散列的集合一起正常运作，包括hashmap hashset hashtable</li>
+ <li>在应用程序的执行期间，只要对象的equals方法的比较操作所用到的信息没有被修改，那么对这同一个对象调用多次，hashCode方法都必须始终如一地返回同一个整数。在同一个应用程序的多次执行过程中，每次执行所返回的整数可以不一致。</li>
+ <li>如果两个对象根据equals()方法比较是相等的，那么调用这两个对象中任意一个对象的hashCode方法都必须产生同样的整数结果。</li>
+ </ul>
  •如果两个对象根据equals()方法比较是不相等的，那么调用这两个对象中任意一个对象的hashCode方法，则不一定要产生相同的整数结果。但是程序员应该知道，给不相等的对象产生截然不同的整数结果，有可能提高散列表的性能。
 hashcode方法一般用户不会去调用，比如在hashmap中，由于key是不可以重复的，他在判断key是不是重复的时候就判断了hashcode这个方法，而且也用到了equals方法。这里不可以重复是说equals和hashcode只要有一个不等就可以了！所以简单来讲，hashcode相当于是一个对象的编码，
 就好像文件中的md5，他和equals不同就在于他返回的是int型搜索的，比较起来不直观。我们一般在覆盖equals的同时也要覆盖hashcode，
