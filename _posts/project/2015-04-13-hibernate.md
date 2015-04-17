@@ -69,10 +69,10 @@ hashcode方法一般用户不会去调用，比如在hashmap中，由于key是�
 
 
 ##ORmapping映射一对一之双向关联，
-使用的是annotation，但是始终有一个地方不太理解，就是mappedBy这个注解，因为双向关联，所以两个表中如果不设置mappedby的话就是每个表都有一个外键，这样的确会照成数据冗余
-而且插入的时候可能还会报错，但是如果加上这个注解，就会变成一个外键，我生成了建表语句，观察了一下，这个建的表不是跟单项关联一样吗？？？于是在网上找了找答案：
-         加了mappedBy的话，只在Person里面加了外键。我们在IdCard类里有一个Person属性，当get或load一个IdCard的时候，hibernate看到了你在这个OneToOne里面加了一个mappedBy，
-         所以会去Person类对应的表里去找一个外键与你要get的IdCard的主键相同的记录，放到IdCard的person属性中。这样也就能根据IdCard来找到Peorson了，也就实现了所谓的双向关联。
+<p>使用的是annotation，但是始终有一个地方不太理解，就是mappedBy这个注解，因为双向关联，所以两个表中如果不设置mappedby的话就是每个表都有一个外键，这样的确会照成数据冗余
+而且插入的时候可能还会报错，但是如果加上这个注解，就会变成一个外键，我生成了建表语句，观察了一下，这个建的表不是跟单项关联一样吗？？？于是在网上找了找答案：</p>
+        *加了mappedBy的话，只在Person里面加了外键。我们在IdCard类里有一个Person属性，当get或load一个IdCard的时候，hibernate看到了你在这个OneToOne里面加了一个mappedBy，
+        *所以会去Person类对应的表里去找一个外键与你要get的IdCard的主键相同的记录，放到IdCard的person属性中。这样也就能根据IdCard来找到Peorson了，也就实现了所谓的双向关联。
 还是没太看懂......可能是数据库学的不太好吧。姑且先记上，回头有时间再说，
 补充：之前的视频没有看完,所以留下了这个疑问,其实视频里也没讲太清楚,即单向关联和双向关联的映射在数据库中建的表是一致的,两者的区别即为建的类不相同，两个实体类互相关联，能够互相找到
 对方。但是还是有疑问,希望以后做实验的时候在说吧
@@ -83,3 +83,5 @@ hashcode方法一般用户不会去调用，比如在hashmap中，由于key是�
 只能是默认的，原本的功能也失去了，第三个JoinTable 多对多，更改创建表的名字。。。。。呵呵
 
 
+##java.lang.IllegalArgumentException: node to traverse cannot be null!
+出现这个错误多半是hql语句出错，仔细检查便可
