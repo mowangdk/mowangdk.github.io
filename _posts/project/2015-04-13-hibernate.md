@@ -85,3 +85,151 @@ hashcode方法一般用户不会去调用，比如在hashmap中，由于key是�
 
 ##java.lang.IllegalArgumentException: node to traverse cannot be null!
 出现这个错误多半是hql语句出错，仔细检查便可
+
+##mappedBy与JoinColumn
+这两个东西一直困扰了我好久，什么时候设置，应该怎么设置，设置这个的用途，今天找到了一个不错的东西，于是将他搬到这里
+<h3>mappedBy</h3>
+  <ul>
+        <li>只有one2one,one2many,many2many才有mappedBy属性,many2one不存在</li>
+        <li>mappedBy标签一定是定义在被拥有方的,他指向拥有方</li>
+        <li>mappedBy含义,应该说，拥有方能够自动维护跟被拥有方的关系,当然 如果从被拥有方通过手工强行来维护拥有方的关系也是可以做到的</li>
+        <li>mappedBy跟JoinColumn/Jointable总是处于互斥的一方,可以理解正是由于拥有方的关联被拥有方的字段的存在，拥有方才拥有了被拥有方,mappedBy这方定义JoinColumn/Jointable总是失败的</li>
+  </ul>
+例子：
+*@OneToOne(cascade = CascadeTye.ALL,optional = true)
+* public IDCard getIdCard(){
+*    return idCard;
+* }
+*@OneToOne(cascade = CascadeType.ALL,mappedBy = "idCard",optional = false)
+* public Person getPerson(){
+*    return person;
+* }
+<p>多了一个mappedBy这个方法，他表示什么呢？它表示当前所在表和Person的关系是定义在Person里面的idCard这个成员上面的，他表示此表是一对一关系中的从表，也就是关系是在person表中维护的，这是最重要的。Person表是关系的维护者，有主导权，它有个外键指向IDCard。
+   我们也可以让主导权在IDCard上面，也就是让他产生一个指向Person的外键，这也是可以的，但是最好让Person来维护整个关系，这样更符合我们的思维。
+   我们也可以看到在Person里面的IDCard是注释optional=true,也就是说一个人是可以没有身份证的，但是一个身份证是不可以没有人的，所以在IDCard里面注释Person的时候，optional=false了，这样就可以防止一个空的身份证记录进数据库。</p>
+
+
+另一个
+  ** 1.person与address的一对一单向关系：
+
+   在address中没有特殊的注解。
+
+   在Person中对应到数据库里面就有一个指向Address的外键.
+
+   我们也可以增加注释指定外键的列的名字,如下:
+   @OneToOne(cascade=CascadeType.ALL,optional=true)
+   @JoinColumn(name="addressID")//注释本表中指向另一个表的外键。
+       public Address getAddress() {
+           return address;
+       }
+   如果我们不加的话,也是可以通过的,在JBOSS里面,它会自动帮你生成你指向这个类的类名加上下划线再加上id的列,也就是默认列名是:address_id.
+   如果是主键相关联的话,那么可以运用如下注释
+   @OneToOne(cascade={CascadeType.ALL})
+      @PrimaryKeyJoinColumn
+      public Address getAddress( ) {
+         return homeAddress;
+      }
+   它表示两张表的关联是根据两张表的主键的
+
+   —————————————————————————————————————————————————————————————————————
+
+   2.person和phone的一对多单向关系：
+
+   phone中没有特别的注释。
+
+   person中：
+
+   @OneToMany(cascade=CascadeType.ALL)
+   @JoinColumn(name="personID")//注释的是另一个表指向本表的外键。
+   public List<Phone> getPhones() {
+         return phones;
+       }
+
+
+   我们可以在Person类里面发现@JoinColumn(name="personID")
+   它代表是一对多,一是指类本身,多是指这个成员,也就是一个类可以对应多个成员.
+   在一对多里面,无论是单向还是双向,映射关系的维护端都是在多的那一方,也就是Phone那里,因为要在数据库面表现的话,也只有让Phone起一个指向Person的外键,不可能在Person里面指向Phone,这一点和一对一不一样,一对一可以在任意一方起一个外键指向对方.可是一对多却不行了.
+
+   在这里@JoinColumn这个注释指的却是在Phone里面的外键的列的名字,
+
+   它并不像在一对一里面的注释指的是自己表里面的外键列名.这一点要特别注意一下.
+
+
+   如果是一对多的双向关系,那么这个注释就要应用到多的那边去了,虽然注释还在Person类里面,但是它起的效果却是在Phone里面起一个叫personID的外键, 因为多的那边要有外键指向少的这边.
+   如果你不加 @JoinColumn(name="personID")这个注释的话,那么JBOSS就会自动帮你生成一张中间表,
+
+   它负现Person和Phone表之间的联系.它将会做如下事情:
+
+   CREATE TABLE PERSON_PHONE
+   (
+       PERSON_id INT,
+    PHONE_id INT
+   );
+   ALTER TABLE PERSON_PHONE ADD CONSTRAINT person_phone_unique
+      UNIQUE (PHONE_id);
+
+   ALTER TABLE PERSON_PHONE ADD CONSTRAINT personREFphone
+      FOREIGN KEY (PERSON_id) REFERENCES PERSON (id);
+
+   ALTER TABLE PERSON_PHONE ADD CONSTRAINT personREFphone2
+      FOREIGN KEY (PHONE_id) REFERENCES PHONE (id);
+
+   所以我们最好还是指定一下,以让程序产生更加确定的行为，不过一般是推荐另外生成一个中间表好一些，因为这样的话，对原来两张表的结构不对造成任何影响。在遗留系统的时候很多用，有些时候，一些表都是以前就建好了的，要改表的结构是不太可能的，所以这个时候中间的表就显得很重要了，它可以在不侵入原来表的情况下构建出一种更清淅更易管理的关系。
+
+   所以一对多的单向关联，我们还是推荐使用一张中间表来建立关系。
+
+   ---------------------------------------------------------------------------------------------------------------------------------------------
+
+   3.person和country的多对一单向关系：
+
+   country中无特别的注解。
+
+   而person注解如下：
+
+   @ManyToOne
+   @JoinColumn(name="countryID")
+       public Country getCountry() {
+           return country;
+       }
+   在一对多一对多一对的关系里面，关系的维护端都是在多的那一面，多的一面为主控方，拥有指向对方的外键。
+   因为主控端是Person .外键也是建在Person上面，因为它是多的一面。当然我们在这里也可以省掉@JoinColumn，那样的话会怎么样呢，会不会像一对多单向一样生成中间的表呢？事实是不会的，在这里如果我们去掉@JoinColumn的话，那么一样会在Person表里面生成一列指向
+
+   Country的外键，这一点和一对多的单向是不一样，在一对多的单向里面，如果我们不在Person 里面加上@JoinColumn这个注释，那么JBOSS将会为我们生成一个中间的表，这个表会有一个列指向Person主键，一个列指向Phone主键。所以说为了程序有一定的行为，有些东西我们还是不要省的好。
+   其实多对一单向是有点向一对一单向的，在主控端里面，也就是从Person的角度来看，也就是对应了一个Country而已，只不过这个Country是很多Person所共用的，而一对一却没有这一点限制。
+
+   －－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－
+
+   4.person和project的多对多单向关系：
+
+   project没有特殊的注解。
+
+   person：
+
+   @ManyToMany
+       public List<Project> getProjects() {
+           return projects;
+       }
+   它需要设置中间表来维护关系，在数据库上跟多对多双向，只不过在编程的逻辑中不一样而已。
+
+   //类似这个：@JoinTable(name = "PersonANDFlight", joinColumns = {@JoinColumn(name = "personID")},
+   //inverseJoinColumns = {@JoinColumn(name = "flightID")})
+   其实这个声明不是必要的,当我们不用@JoinTable来声明的时候,JBOSS也会为我们自动生成一个连接用的表,
+
+   表名默认是主控端的表名加上下划线"_"再加上反转端的表名.
+
+   类似
+
+   @ManyToMany(cascade = CascadeType.ALL)
+       @JoinTable(name = "PersonANDFlight",
+   　　　　　　　　joinColumns = {@JoinColumn(name = "personID")},
+   　　　　　　　　inverseJoinColumns = {@JoinColumn(name = "flightID")})
+       public List<Flight> getFlights() {
+           return flights;
+       }
+
+   －－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－
+   在单向关系中没有mappedBy,主控方相当于拥有指向另一方的外键的一方。
+   1.一对一和多对一的@JoinColumn注解的都是在“主控方”，都是本表指向外表的外键名称。
+   2.一对多的@JoinColumn注解在“被控方”，即一的一方，指的是外表中指向本表的外键名称。
+   3.多对多中，joinColumns写的都是本表在中间表的外键名称，
+     inverseJoinColumns写的是另一个表在中间表的外键名称。
