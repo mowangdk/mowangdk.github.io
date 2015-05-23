@@ -247,3 +247,22 @@ hashcode方法一般用户不会去调用，比如在hashmap中，由于key是�
 按照视频上来说,在load方法的里面添加第三个参数LockMode就可以建立悲观锁,但是当我试验的时候却发现这个方法已经过时了，这个就比较坑了。。而且官方的文档上还没有给出说明,暂且记住吧
 
 
+##createQuery与createSQLquery的区别
+前者用的hql语句进行查询，后者可以用sql语句查询
+前者以hibernate生成的Bean为对象装入list返回
+后者则是以对象数组进行存储
+所以使用createSQLQuery有时候也想以hibernate生成的Bean为对象装入list返回，就不是很方便
+突然发现createSQLQuery有这样一个方法可以直接转换对象
+Query query = session.createSQLQuery(sql).addEntity(XXXXXXX.class);
+XXXXXXX 代表以hibernate生成的Bean的对象，也就是数据表映射出的Bean。
+
+
+
+##iterator与list
+利用createQuery取得的结果可以有两种，1.使用List遍历.2.使用iterator遍历。简单说一下这两个的区别.记的好像看过。巩固一下。List为取出所有对象,但是iterator是取出所有的id然后取出的时候来进行id的查询
+
+
+
+##关于细节问题
+其一：createQuery使用的是hql，其中from..指定的是表名，但是如果给@Entity的name属性赋值的时候那个form后面的实体类名就会变成name后面的属性值
+其二：使用.List方法的时候要求实体类必须得有默认的构造方法,今天为了方便就是写了一个带参数的构造方法，结果就报错了
