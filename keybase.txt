@@ -1,0 +1,67 @@
+==================================================================
+https://keybase.io/geyingqi
+--------------------------------------------------------------------
+
+I hereby claim:
+
+  * I am an admin of http://geyingqi0701.tk
+  * I am geyingqi (https://keybase.io/geyingqi) on keybase.
+  * I have a public key with fingerprint 2169 EAD3 1388 800C 4CD3  B18E E208 3190 6D8E 34F0
+
+To do so, I am signing this object:
+
+{
+    "body": {
+        "key": {
+            "fingerprint": "2169ead31388800c4cd3b18ee20831906d8e34f0",
+            "host": "keybase.io",
+            "key_id": "e20831906d8e34f0",
+            "kid": "0101cac5f1ee238d227e02c1454d5760e3014ed60f8bc4db17fd8c9b0a5eca75b65d0a",
+            "uid": "888d1c33589374141b2340b308c66319",
+            "username": "geyingqi"
+        },
+        "service": {
+            "hostname": "geyingqi0701.tk",
+            "protocol": "http:"
+        },
+        "type": "web_service_binding",
+        "version": 1
+    },
+    "ctime": 1432871089,
+    "expire_in": 157680000,
+    "prev": "aaa6f10352a61a56cd3f4ab29d979b9a9ca1b449d11d0cb34d635f6eb4b31469",
+    "seqno": 2,
+    "tag": "signature"
+}
+
+which yields the signature:
+
+-----BEGIN PGP MESSAGE-----
+Version: Keybase OpenPGP v2.0.8
+Comment: https://keybase.io/crypto
+
+yMIcAnicbZJZSFRRGMdHc0mj7CWIShoubdRo59xz7p17pw0qkYqpjKw0Tc52x6s1
+u5aJUNFG0Go0FVj00Gpg0WaRtJgp9BIkEUYhhBGkFG0UMkznSr1ET4fzff//73z/
+j/Nk7ChXbtrbjtbesTtSu9KePVpS5yoN9F9vVGiINyi+RqVWjByWHQyIaDhqB+OK
+T1GhbgrCEUSGYQDAMOOIQkMIFRgImkDnhkDYAopHqQ7FHIfEUBIThXZI1uSlyuay
++h997UgDQAAZYZoFJRMZXFW9AqgMYg1zzasDgQDEguvAMijDnEKvxQ1mUkA0wYhX
+o7rGAZG4uhGcnJJDhpBmmMiLIYZURRhQBAym63IARxgT0SDZIqQ6IBpk2oitNHkU
+Wa23mXBW4CT5RwG8ABbGa6U9HA3FQyy0WTar4/Gwz/HGG8KOeKugVX8wVdQOcumU
+hnoRjdmhoOKDUsnitsOFGKmGFwLD9ChiW9iOiirbUcjEcssAOM+IeokkhOgWBEhT
+iQ6Jpsv1W5hQ1eSm16QmMRmBFGOTQ8gBowhzHWmWLiimCGLdyRsTkWBI8alyTBKQ
+yJgdCJJ4XVQoTY8fVmS40nJdWZnpzl9w5eaM//tD2guyU5F2d2fCY3uOzWrtGO0e
++lbSOPfn4GDm001Zdy4sqvbvm9E9KvsVW/40OfnN5Qf9Bbc6bydflzWPa6txJe8e
+vJq1YkNReSq7pXRlYFokmfqCv3Y3/qhc2HLkzIeheVcyKk+dtT9vLls1u+bQ1J6Z
+XWWb8hbfKGouOLp/bW6nv/Q7u5TYdTn5yX/o43p/4fDLuannRe6ePR2/hgdfT5yY
+D+YfvVUza/hi/h7/uWkHTmyvKL/ozmhe1rZg45WdAwO91zynrXvu1sPFx5tIZO+a
+nJt9Je3Hhq9m7rydvZrMrC/e/W6CJ1H5vi+xZHpi5dIp24v3+dfl141r852f84JM
+6srrHxqTfvJ+9De7lyno
+=OvxV
+-----END PGP MESSAGE-----
+
+And finally, I am proving ownership of this host by posting or
+appending to this document.
+
+View my publicly-auditable identity here: https://keybase.io/geyingqi
+
+==================================================================
