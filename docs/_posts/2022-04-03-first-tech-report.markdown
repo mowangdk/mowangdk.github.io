@@ -5,7 +5,7 @@ date:   2022-04-03 20:30:08 +0800
 categories: weeklyreport
 ---
 
-## 论文 
+# 论文 
 
 ### [ceph](https://www.usenix.org/legacy/event/osdi06/tech/full_papers/weil/weil_html/index.html)
 
@@ -23,11 +23,33 @@ categories: weeklyreport
 首先最重要的就是元数据和数据本身的分离, 经过统计, 元数据的请求差不多占用的磁盘整体负载的一半, 这样将两者分开可以有效的减缓数据盘的压力, 并且元数据的 server 可以单独进行扩容. 这里 MDS 用了一种 [动态子树分区](Dynamic metadata management for petabyte-scale file systems. In Proceedings of the 2004 ACM/IEEE Conference on Supercomputing (SC '04). ACM, Nov. 2004.") 的系统来存储数据目录结构. 这个算法主要是为了分配目录结构。
 同样 OSD 集群也是可以单独进行扩容的， 同时 OSD 集群里面还内置了数据的多备份 & 热数据的迁移等功能。 这里简单的介绍下 OSD 存储数据的方式。 首先，它将一份文件分成了若干个Objects（用于支持同一个文件的并发读写）， 每个 Objects 使用算法都分配到不同的 PlacementGroups 里面， 之后， OSD 是以 PG 为单位进行数据的存储， 最后就是底层的 ObjectStorageDevice 的任务了， 它将每一块 PG 都存储到对应的一个块设备上，如果声明了数据需要多副本， 那么就将 对应的 PG 分别复制到不同的 Device 上。这三份数据会按照主备进行服务， 平时提供服务的主要是主 PG， 如果主 PG 挂掉或者是网络不可达， 备 PG 将会统一对外提供读写服务
 
+-- 未完待续
 
 
+# 基础
 
-## 基础
-
-- NVMe
-本周主要熟悉了一下 NVMe， 因为最近工作中总是遇到， 所以找个时间了解下， NVMe 本身是一种逻辑设备接口，用于访问通过PCIe 接口链接上来的非易失性存储设备。 它的出现主要是为了提高块设备的使用效率， 之前的逻辑设备接口（AHCI）. 主要是针对HHD设备设计的。总所周知这种设备的io效率非常低下（寻址）. 而 NVMe 则是专门为 SSD 固态设备设计的接口. 他可以充分的发挥 ssd 盘快速寻址以及并发度的优势。换句话说， 使用AHCI 的SSD 盘 完全没有发挥出它的本来性能.用于访问通过PCIe 接口链接上来的非易失性存储设备。
+### NVMe
+本周主要熟悉了一下 NVMe， 因为最近工作中总是遇到， 所以找个时间了解下， NVMe 本身是一种逻辑设备接口，用于访问通过PCIe 接口链接上来的非易失性存储设备。 它的出现主要是为了提高块设备的使用效率， 之前的逻辑设备接口（AHCI, AHCI 是 SATA 的driver，他优化了一开始的SATA总线速度， 但是这个driver 是强依赖 SATA 总线的）. 主要是针对HHD设备设计的。总所周知这种设备的io效率非常低下（寻址）. 而 NVMe 则是专门为 SSD 固态设备设计的接口. 他可以充分的发挥 ssd 盘快速寻址以及并发度的优势。换句话说， 使用AHCI(SATA)的SSD 盘 完全没有发挥出它的本来性能.用于访问通过PCIe 接口链接上来的非易失性存储设备。旧有的协议吞吐量也已经完全赶不上ssd的发展速度
 另， NVMe逻辑是存储在NVMe芯片上的，这个芯片是与存储设备绑定到一起。所以并不涉及 PCIe 接口的兼容性问题
+
+多一句嘴， AHCI 是支持设备最广的一种协议， 但是由于无法使得ssd达到最优的性能. 所以败下阵来
+
+# 日常
+
+### 更加安全的pod启动方式
+
+k8s 为 pod 提供了一种更安全的启动方式， 他可以自动过滤系统中的危险系统调用， 只暴露出安全的系统调用给容器内的应用。目前是以白名单的方式运行的， 配置了 这个参数的容器将更加安全
+
+```yaml
+securityContext:
+  seccompProfile:
+    type: RuntimeDefault
+```
+
+### pod挂载点重启
+普通情况下， 只有在pod重启的时候pod使用的volume才会重新卸载挂载， 但是有个例外就是某个container使用了 subpath, 这种情况下， container 本身重启也可能触发volume的卸载挂载， 如果这时候， 某个sidecar 的运维容器访问volume挂载目录, 这是就可能出现device busy的情况。
+
+
+# 社区
+
+之前参与的 trivy 支持的 containerd 的任务， 最近终于接近尾声了，有几个测试镜像之前是放到我的个人镜像仓库下面的，现在需要统一放到项目的 repo下面， 可惜之前打镜像的步骤忘了，重新试了好几次才ok
