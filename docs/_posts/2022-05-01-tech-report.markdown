@@ -31,4 +31,4 @@ once.Do(func() {fmt.Printf(“never run…”)})
 
 # 社区
 
--  还是上周的 pr [pr](https://github.com/kubernetes/autoscaler/pull/4798), 这周终于合并了, 可喜可贺
+-  还是上周的 [pr](https://github.com/kubernetes/autoscaler/pull/4798), 这周终于合并了, 可喜可贺
