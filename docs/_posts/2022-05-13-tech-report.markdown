@@ -1,7 +1,7 @@
 ---
 layout: post
 title:  "weekly report"
-date:   2022-05-14 22:30:08 +0800
+date:   2022-05-13 22:30:08 +0800
 categories: weeklyreport
 ---
 
@@ -15,7 +15,7 @@ categories: weeklyreport
 
 最近工作的主要事情之一就是优化 pod 的启动时间, 主要涉及两个方面, 一个是管控侧 kcm 的逻辑优化, 另一个是节点侧 kubelet 的逻辑优化, 对比了 k8s 1.20的社区代码和现在的社区代码(1.24),发现 kcm 上的代码没有特别大的变动,只是改了一下文件路径. kubelet 上倒是做了一些优化,来加速 pod 上面的持久卷的绑定速度. 简单整理了一下调用流程关系, 后续附上
 
-![csi mount costs](/assets/img/rose.jpg)
+![csi mount costs](/assets/img/kubelet-volumes.png)
 
 # 社区
 
