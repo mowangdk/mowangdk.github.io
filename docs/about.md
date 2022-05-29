@@ -3,5 +3,6 @@ layout: default
 title: About
 ---
 
-# [YAMT - Yet Another Minimal Theme](https://yamt.netlify.app/)
-See [Github](https://github.com/PandaSekh/Jekyll-YAMT).
+# [katsueiki](http://mowangdk.github.io/)
+
+General computer programmer working at aliyun cloud. Mainly responsible for k8s storage. 
