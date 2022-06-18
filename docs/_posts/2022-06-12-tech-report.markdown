@@ -20,7 +20,7 @@ categories: weeklyreport
 
 ### CSI在挂载过程中获取 pod 信息
 
-由于 pod 的信息只在  NodePublishVolume 接口中透出, 所以无法在 NodeStageVolume 中获取到相关信息. 只能将 NodeStageVolume 中挂载 globalmount 的步骤 undo 掉
+由于 pod 的信息只在  NodePublishVolume 接口中透出, 所以无法在 NodeStageVolume 中获取到相关信息. 如果想要在 pod 上面加 label 来控制 volume 的挂载的话. 只能将 NodeStageVolume 中挂载 globalmount 的步骤 undo 掉, 不建议用这种方式. 建议通过修改 kubelet or 通过其他方式来获取自定义配置
 
 
 ### 内存带宽
