@@ -32,3 +32,68 @@ Virtio 是kvm中IO虚拟化的主要平台, 主要思想是为 io 虚拟化提�
 ### xfs
 
  xfs 是一个高性能日志文件系统, 由 Silicon Graphics 创建, 由于可以触发并行的 IO流, 所以它的生产力很高.  xfs reflinks 功能可以在不同的文件之间复用同样的数据块的能力 Data Block Sharing (快速生成 vmimage/目录树 的快照,), 也提供重复数据删除和快速写时拷贝的能力. Xfs 将 iopath 的功能从基础设施中抽出. 进行了优化, 并且替换了文件系统的数据结构, 改成了 btree ?
+
+ 使用 xfs reflinks 的方式
+
+ ```shell
+# initial
+mkfs.xfs /dev/sda1
+mount /dev/sda1 /storage
+mkdir /storage/images
+
+# make img
+truncate -s 30g /storage/images/os8_base.img
+
+qemu-system-x86_64 -hda /storage/images/os8_base.img -cdrom /isoz/os8_install.iso
+
+# xfs_bmap -e -l -p -v -v -v /storage/images/os8_base.img
+/storage/images/os8_base.img:
+ EXT: FILE-OFFSET           BLOCK-RANGE          AG AG-OFFSET               TOTAL FLAGS
+   0: [0..15728639]:        52428960..68157599    1 (160..15728799)      15728640 000000
+<listing shortened for brevity>
+
+
+
+# df -h /storage
+Filesystem       Size  Used Avail Use% Mounted on
+/dev/sda1        100G   32G   68G  32% /storage
+
+
+/usr/bin/time cp -pRdu --reflink /storage/images/os8_base.img /storage/images/vm1.img
+0.00user 0.00system 0:00.02elapsed 39%CPU (0avgtext+0avgdata 2568maxresident)k
+0inputs+0outputs (0major+108minor)pagefaults 0swaps
+
+
+xfs_bmap -e -l -p -v -v -v /storage/images/vm1.img
+/storage/images/vm1.img:
+ EXT: FILE-OFFSET           BLOCK-RANGE          AG AG-OFFSET               TOTAL FLAGS
+   0: [0..15728639]:        52428960..68157599    1 (160..15728799)      15728640 100000
+<listing shortened for brevity>
+ FLAG Values:
+    0100000 Shared extent
+    0010000 Unwritten preallocated extent
+    0001000 Doesn't begin on stripe unit
+    0000100 Doesn't end   on stripe unit
+    0000010 Doesn't begin on stripe width
+    0000001 Doesn't end   on stripe width
+
+
+xfs_bmap -e -l -p -v -v -v /storage/images/vm1.img
+/storage/images/vm1.img:
+ EXT: FILE-OFFSET           BLOCK-RANGE          AG AG-OFFSET               TOTAL FLAGS
+   0: [0..15728639]:        52428960..68157599    1 (160..15728799)      15728640 100000
+<listing shortened for brevity>
+ FLAG Values:
+    0100000 Shared extent
+    0010000 Unwritten preallocated extent
+    0001000 Doesn't begin on stripe unit
+    0000100 Doesn't end   on stripe unit
+    0000010 Doesn't begin on stripe width
+    0000001 Doesn't end   on stripe width
+
+df -h /storage
+Filesystem       Size  Used Avail Use% Mounted on
+/dev/sda1        100G   32G   68G  32% /storag
+
+
+ ```
