@@ -15,6 +15,8 @@ categories: weeklyreport
 
 ### 30 天自制操作系统
 
+同样进展不多
+
 # 工作
 
 
