@@ -46,4 +46,4 @@ issue 本身已经被 reviewer lgtm 了, 但是 owner 最近 PTO 了, 导致迟�
 
 ### 集群里面大量 pod ContainerCreating
 
-看了下 external-attacher 发现有客户端限流的场景, 如果客户端有超时删除重建的场景, 这个pod 会越来越多. 所以我们一般建议超市时间长一些, 这样不会等到 external-attacher 刚消费到这个 pvc 又被删除这种情况
+看了下 external-attacher 发现有客户端限流的场景, 如果客户端有超时删除重建的场景, 这个pod 会越来越多. 所以我们一般建议超时时间长一些, 这样不会等到 external-attacher 刚消费到这个 pvc 又被删除这种情况
