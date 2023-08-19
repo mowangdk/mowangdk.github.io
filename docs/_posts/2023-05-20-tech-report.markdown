@@ -43,7 +43,7 @@ volumeDevice 在宿主机上主要有四个主要挂载关系(路径) + 一个 l
 
 - /dev/loop0: [0006]:11044296 (${kubeRootPath}/plugins/kubernetes.io/csi/volumeDevices/${pvName}/dev/${poduid})
 
-mount -o bind /dev/xxx /mnt/test 之后源路径都会变成 /dev/devtmpfs 
+mount -o bind /dev/xxx /mnt/test 之后源路径都会变成 /dev/devtmpfs, 但是 通过 findmnt SOURCE heading 可以观察到实际关联的 /dev 设备
 
 ### nfs 
 
