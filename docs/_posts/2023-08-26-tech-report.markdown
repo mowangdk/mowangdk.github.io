@@ -15,7 +15,7 @@ categories: weeklyreport
 
 # 社区
 
-subtree updated PR merged.
+subtree updated PR merged. 
 
 # 工作
 
@@ -38,6 +38,12 @@ bdf: bus device function, use to describe pci or pcie devices
 举个例子, 下面这个 bdf 就是 Bus 0, Device 2, Function 0:
 
 00:02.0
+
+使用如下命令查看 bdf 设备有多少个 virtual-functions
+
+```
+cat /sys/bus/pci/devices/0000\:00\:02.0/sriov_numvfs
+```
 
 
 ### csi nodeexpandvolume
