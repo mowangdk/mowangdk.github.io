@@ -20,7 +20,9 @@ https://github.com/kubernetes/kubernetes/pull/120377
 
 ### volumeDevice blockfile
 
-近期有人反馈重启节点之后 pod 通过 volumeDevice 声明的文件就会变成空白文件, 这个需要实际复现下. 目前看起来只在 1.18 的集群里面有用.
+近期有人反馈重启节点之后 pod 通过 volumeDevice 声明的文件就会变成空白文件, 这个需要实际复现下. 目前看起来只在 1.18 的集群里面有问题. 
+
+> 在 1.26 集群上试了一下, 没有发现复现, 可能是 kubelet 的版本有 bug
 
 ### nas 文件系统挂载失败问题
 
