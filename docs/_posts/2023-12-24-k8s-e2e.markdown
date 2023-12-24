@@ -1,0 +1,162 @@
+---
+layout: post
+title:  "weekly report"
+date:   2023-12-24 22:30:08 +0800
+categories: weeklyreport
+---
+
+> 本文基于 kubernetes master 分支最新 commit.  commitid: bf3f9ff2a52160644f0851902f1712486909e778
+
+### 背景
+最近在给社区提一些关于调度器的 pr. 遇到了一些奇怪的 e2e 报错. 于是就想在本地测试环境复现解决. 突然发现 kubernetes 的 e2e 系统的复杂, 写一篇文档作为记录
+
+
+### 现象
+在 e2e 的任务里面报如下错误.
+
+```
+message: 'running "VolumeBinding" filter plugin: no matching CSI node driver, pv driver csi-hostpath-read-write-once-pod-5766 is not match csinode driver: [{csi-hostpath-ephemeral-912 kind-worker [topology.hostpath.csi/node] &VolumeNodeResources{Count:*10,}}]'
+```
+
+通过打印日志发现, 集群里面确实是存在满足 调度条件的节点的. 于是开始排查问题
+
+
+### 存储 e2e 架构
+
+首先 k8s  存储的 e2e 测试用例是写在 kubernetes 项目里面的, 相关代码.  但是 e2e 是需要集成实际的存储的. 那么这个存储是怎么做的?  对于 CSI 的情况, 社区专门为 e2e 编写了一个 csi-driver-host-path.  这个项目实现了所有的 csi 的接口. 这个 driver 对应的存储就是本地存储. 相当于对外提供了一个本地盘.  但是社区明确说明了, 这个存储不能作为 csi 参考, 只是用于 e2e. 所以大家如果需要相关的 demo 参考请查看 ack/aws 相关的实现. 这个实现是经过了线上验证的. 有一定的保障.
+
+总结下. 社区的存储 e2e 就是在 ci 环境里面.部署了一个本地的 kind(kubernetes in docker) . 然后将相关的存储 driver 跑在集群里面. 最后运行这些 e2e 用例的. 默认的 e2e 是用于跑 kind 的. storage 内还有一个 external 的文件夹这个可以用于跑外部的 csi driver 进行验证.
+
+
+### 本地部署
+基于上面的架构, 我们面临两种选择, 
+
+第一个就是完全按照社区的方式, 将变更后的源代码打包到 kind 里面去, 生成一个本地集群. 然后跑 e2e 测试, 优点是可以直接无脑搞 .缺点是每次都要打包镜像. 并且自定义一些参数很麻烦. 
+第二种方式就是复用目前的 ack 的集群, 然后本地跑 e2e , 这样的好处是方便简单. 不需要编译镜像. 但是需要比较多前期工作
+
+
+#### kind 安装/构建/运行
+首先我尝试的是使用社区原生的方式. 直接运行 kind 集群. 然后跑 e2e. 我们从 kubernetes 上面的流水线扒下来了一些命令.
+
+```shell
+bash -c curl -sSL https://kind.sigs.k8s.io/dl/latest/linux-amd64.tgz | tar xvfz - -C "${PATH%%:*}/" && e2e-k8s.sh
+
+x kind
+x e2e-k8s.sh
+```
+
+ 这条命令主要是下载了一个 targz 的压缩包, 这个压缩包里面包含一个 kind 命令 和一个 e2e-k8s.sh . 后面我们主要就是跟这个 e2e-k8s.sh 打交道,
+
+> 坑 1:  社区 ```linux-arm64.tgz``` 里面的 kind 居然也是 amd64 的,  在 M1 mac 里面执行会报 format error
+
+由于上述原因, 我们没办法直接用社区的 kind, 所以只能直接从 brew 或者是 kind 官网上下载 arm 版本的 kind.
+
+正常来说后面我们就应该执行 kind build, 构建出我们需要的 kind 镜像. 相关的步骤已经包含在 e2e-k8s.sh shell 里面了. 这里不在赘述
+这里  kind build node-image -v 1 命令会自动找当前机器下的 $GOPATH/src/k8s.io/kubernetes   路径并使用源代码进行编译. 这点还挺好的. 
+
+```shell
+# build kubernetes / node image, e2e binaries
+build() {
+  # build the node image w/ kubernetes
+  kind build node-image -v 1
+  # Ginkgo v1 is used by Kubernetes 1.24 and earlier, fallback if v2 is not available.
+  GINKGO_SRC_DIR="vendor/github.com/onsi/ginkgo/v2/ginkgo"
+  if [ ! -d "$GINKGO_SRC_DIR" ]; then
+      GINKGO_SRC_DIR="vendor/github.com/onsi/ginkgo/ginkgo"
+  fi
+  # make sure we have e2e requirements
+  make all WHAT="cmd/kubectl test/e2e/e2e.test ${GINKGO_SRC_DIR}"
+
+  # Ensure the built kubectl is used instead of system
+  export PATH="${PWD}/_output/bin:$PATH"
+}
+```
+到构建为止还算是比较顺利, 没有什么太大问题.  但是在使用 kind create cluster 的时候问题出现了. 而且是一堆问题. 但是奇怪的是用 kind 官方的 node-image 就没问题. 
+
+> 坑 2 : kind-config.yaml 一直报错, 或是 yaml 错误, 或者是 config apiversion 不匹配.
+
+```
+❯ kind create cluster --image=kindest/node:latest --retain --wait=1m -v=3 --config=/logs/artifacts/kind-config.yaml
+
+
+error: error executing jsonpath "{.contexts[?(@.name == \"\")].context.cluster}": Error executing template: <nil> is not array or slice and cannot be filtered. Printing more information for debugging the template:
+ template was:
+  {.contexts[?(@.name == "")].context.cluster}
+ object given to jsonpath engine was:
+  map[string]interface {}{"apiVersion":"v1", "clusters":interface {}(nil), "contexts":interface {}(nil), "current-context":"", "kind":"Config", "preferences":map[string]interface {}{}, "users":interface {}(nil)}
+
+```
+
+#### 使用 ack 进行 e2e 测试
+
+上面的问题卡主了很久, 没有找到合适的解决方案. 为了尽快回归到主线. 所以干脆抛弃了上述方案, 考虑直接在本地连接 ack
+集群.
+
+scheduler 的编译/部署
+由于我们修改的是调度器相关的逻辑. 所以我们是要自己去编译源码的, 这里我们使用 kubetest 工具来帮助我们编译 kubernetes 源码.
+https://github.com/kubernetes/test-infra . 把这个项目 download 到本地之后, 在项目根目录下执行相关命令就可以编译出来 kubetest 的二进制了
+
+```
+go install k8s.io/test-infra/kubetest
+```
+
+至于 kubernetes 本身的项目编译也很简单. 直接进到 kubernetes root 目录下. 执行 
+kubetest --bulid
+命令, 就可以在 _output 文件夹下找到编译出来的二进制了
+
+
+在 ack 集群中运行 scheduler 的调度器
+因为我们要跑 e2e 测试. 这里的测试都是使用的默认的调度器. 我们很难一个一个修改. 所以干脆使用默认的调度器. 至于 ack 集群的版本这里应该使用专有版集群, 因为默认托管版集群是没有办法看到 scheduler 的应用的. 
+
+准备配置文件
+```
+apiVersion: kubescheduler.config.k8s.io/v1
+kind: KubeSchedulerConfiguration
+clientConnection:
+  kubeconfig: /Users/katsueiki/.kube/config  #  ack 集群的地址
+leaderElection:
+  leaderElect: false
+profiles:
+- schedulerName: default-scheduler # 指定调度器名称, 当前名称为默认调度器
+禁止掉集群自带的 scheduler
+kubectl scale --replicas=0 deploy/scheduler -nkube-system
+```
+
+部署上面编译的 scheduler
+./kube-scheduler --kube-api-qps=50  --kube-api-burst=100  --leader-elect=false  --profiling=false  --authentication-kubeconfig=/Users/katsueiki/.kube/config  --authorization-kubeconfig=/Users/katsueiki/.kube/config  --config=./scheduler_config.yaml --v=5 --logging-format=json
+
+// 顺利执行
+
+
+执行 kubetest
+我们可以同样利用上面的 kubetest 命令来运行我们的 e2e 测试, 但是由于 k8s 默认的 e2e 测试量非常大, 我们只需要运行我们关注的 e2e 测试即可, 
+
+```
+kubetest --test --test_args="--ginkgo.focus=volumeMode --ginkgo.fail-fast" --provider=local --kubeconfig=/root/.kube/config
+```
+
+如果你需要直接修改测试用例加 log , 可以直接在 kubernetes 根目录下编译 e2e 测试用例
+go install ./test/e2e
+
+报错原因
+
+经过上面漫长的操作, 我们总算在本地跑通了 e2e 测试.  至于开头的那个问题. 也就迎刃而解了. 原因是在新增一个 filter 之后, 我编写的返回值有异常
+
+```golang
+        // 新增的 filter
+        err = volume.CheckCSINodeDriverAffinity(csiNode, pv)
+  if err != nil {
+   logger.V(4).Info("PersistentVolume and csinode driver mismatch for pod", "PV", klog.KRef("", pvName), "csinode", klog.KObj(csiNode), "pod", klog.KObj(pod), "err", err)
+   return false, true, err // 这里的问题, 如果想要调度器尝试所有节点的话, 这里不应该返回异常. 而是应该像下面的例子一样返回 nil. 
+  }
+        // 原有的 filter
+  err = volume.CheckNodeAffinity(pv, node.Labels)
+  if err != nil {
+   logger.V(4).Info("PersistentVolume and node mismatch for pod", "PV", klog.KRef("", pvName), "node", klog.KObj(node), "pod", klog.KObj(pod), "err", err)
+   return false, true, nil
+  }
+```
+
+自此算是解决了当时的问题. 至于 kind 为啥会报错. 再说吧.
+
+
