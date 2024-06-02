@@ -8,6 +8,15 @@ categories: weeklyreport
 
 # 读书
 
+### 大话存储
+CDP 相关的部分我全部都跳过了, 直接跳到后面的系统 IO 了, 还是这块对我的帮助比较大, 关于备份和灾备的问题可能后面回过头来再看看比较好
+
+### Virtio 
+
+https://www.redhat.com/en/blog/virtio-devices-and-drivers-overview-headjack-and-phone
+
+最近在读 virtio 相关的文章, 确实让我对整个 kata 的架构有了更深的了解, 比如 guest 到 host 的数据传输是直接自从 guest kernel 到 host kernel 的. 没有经过 guest 的 userspace, 减少了一次 context switch. 不过相关的一些命令下发和元数据处理还是要走
+
 
 
 # 社区
