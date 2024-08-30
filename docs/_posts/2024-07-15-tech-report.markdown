@@ -28,7 +28,7 @@ The xattr (extended attributes) command on devices or files in Linux is used to 
 
 扩展属性（xattrs）通常存储在磁盘上的独立数据块中，并通过inode.i_file_acl*在inode中引用。扩展属性最早的应用是存储文件ACL（访问控制列表）和其他安全数据（如Selinux）。通过挂载选项"user_xattr"，用户可以存储扩展属性，条件是所有属性名称必须以"user"开头。不过，这种限制似乎在Linux 3.0及以后的版本中已经消失了。
 
-setfattr should be used on files or directories, not directly on block devices like /dev/vdb
+setfattr should be used on files or directories, not directly on block devices like /dev/vdb. this is only for setfattr...
 
 
 use cases
