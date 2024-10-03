@@ -42,7 +42,8 @@ No, “v1.2.3” is not a semantic version. However, prefixing a semantic versio
 
 
 
+# 工作
 
+### fencing
 
-
-
+"围栏"是指将节点从集群的共享存储中断开连接。它阻止了节点对共享存储的输入/输出操作，以此确保数据的完整性。这一过程由集群基础设施通过“围栏守护进程”（fenced）来执行。 主要分成两类， 一个是 storage fencing， 另一个是 power fencing， power fencing 比较简单， 直接远程关机掉fencing节点， storage fencing 则是禁掉相关的端口

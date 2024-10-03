@@ -33,7 +33,7 @@ runc 容器启动流程
 5. containerd/docker runtime manager 收到请求开始指定调用 containerd shim
 6. containerd shim 调用 runc create 命令开始创建运行时(在这里执行 overlay mount, 准备运行时使用的 rootfs)
 7. runc create 开始
-8. nsexec 开始, 调用 unshare 方法创建一个新的 mount namespace
+8. nsexec 开始, 调用 unshare 方法创建一个新的 mount namespace(每个 container一个)
 9. 调用 runc init 命令初始化 runc
 10. loop 所有的 device 等待 runc 的挂载点 ready
 11. pivotRoot, 将上面的 overlay fs 挂载点更改为 rootfs
