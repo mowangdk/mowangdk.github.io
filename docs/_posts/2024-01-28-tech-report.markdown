@@ -56,4 +56,4 @@ losf -a +L1 可以显示当然所有的 orphan inodes . 它的原理就是遍历
 
 ### kubernetes pki
 
-大多数的整数都存储在这一个路径. 还有一些用户的证书被放到了/etc/kubernetes 目录下
+大多数的整数都存储在这一个路径. 还有一些用户的证书被放到了 /etc/kubernetes 目录下
