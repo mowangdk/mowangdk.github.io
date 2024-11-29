@@ -43,7 +43,7 @@ type reportClient interface {
 
 #### Deck
 
-主要用来显示 prow 里面正在云盘或者最近运行的任务
+主要用来显示 prow 里面正在运行或者最近运行的任务
 
 deck 可以通过 ```./cmd/deck/runlocal``` 在本地运行
 
