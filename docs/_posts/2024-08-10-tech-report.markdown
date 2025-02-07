@@ -46,6 +46,5 @@ categories: weeklyreport
 ### job completed
 引用了 pvc 的 job 在 completed 的时候就会卸载云盘, 相关代码: https://github.com/kubernetes/kubernetes/blob/a06568062c41b4f0f903dcb78aa6ea348bbdecfc/pkg/controller/volume/attachdetach/util/util.go#L171
 
-
-### 
-
+- adcontroller 会感知已完成的pod， 并且删除对应的 VolumeAttachments
+- pvcontroller 则不同，无法感知已完成的pod， 必须将pod删除， 才能把pvc 删除

@@ -20,10 +20,6 @@ lvs --reportformat json --units b -o lv_kernel_major,lv_kernel_minor --nosuffix 
 上面这个命令遇到了 major & minor 返回-1 的情况, 经调查，发现如果lv关联的pv 不存在的话，就会导致这个问题。
 
 
-### job pod issue
-
-- adcontroller 会感知已完成的pod， 并且删除对应的 VolumeAttachments
-- pvcontroller 则不同，无法感知已完成的pod， 必须将pod删除， 才能把pvc 删除
 
 
 ### golang flag parse
