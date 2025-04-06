@@ -59,5 +59,13 @@ btw, image 的SBOM生成工具在这里 https://github.com/anchore/syft, 同时�
 command: 
 
 ```
-lsns -t mnt | tail -n +2 | aws '{print $4}' |  xargs bash -c "cat /proc/{}/mountinfo | grep xxx && echo '-> found in /proc/{}/mountinfo'" 
+lsns -t mnt | tail -n +2 | awk '{print $4}' |  xargs -I{} bash -c "cat /proc/{}/mountinfo | grep xxx && echo '-> found in /proc/{}/mountinfo'" 
+```
+
+```
+lsns -t mnt
+        NS TYPE NPROCS    PID USER   COMMAND
+4026531840 mnt     187      1 root   /usr/lib/systemd/systemd --switched-root --system --deserialize 18
+4026531862 mnt       1     33 root   kdevtmpfs
+4026532144 mnt       1    533 root   /usr/lib/systemd/systemd-udevd
 ```
