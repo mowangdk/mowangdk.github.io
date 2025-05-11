@@ -46,6 +46,7 @@ issue: https://github.com/containerd/containerd/issues/11160
 
 存在泄露问题
 
+contaienrd 1.6.36已知BUG，tty有泄漏问题，用户可更新到1.6.37解决	临时方案：调大	/proc/sys/kernel/pty/max 内核参数或容器关闭tty
 
 ### 查询进程被kill的关联信息
 
