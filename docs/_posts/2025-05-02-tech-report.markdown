@@ -62,7 +62,7 @@ merged = upperdir + lowerdir[N] + lowerdir[N-1] + ...
 4. 常见流程
 
 操作	结果
-镜像拉取	每一层生成一个只读 View snapshot
+镜像拉取	每一层生成一个只读 View snapshot (overlayfs 的 snapshot 结构与 Git commit 概念类似，有 parent-child 层级。)
 创建容器（Prepare）	创建 Active snapshot，生成 upper/、work/
 挂载容器文件系统	overlayfs 合并 lowerdir 与 upperdir，生成 merged
 Commit snapshot	把 Active 层提交为新的 View 层（变成只读）
@@ -78,14 +78,21 @@ Commit snapshot	把 Active 层提交为新的 View 层（变成只读）
 	•	Mounts()：获取 overlay mount 配置
 	•	Remove()：清理 snapshot
 
-⸻
 
-6. 额外提示
-	•	snapshot 是分层增量存储，便于重用和快速创建。
-	•	overlayfs 的 snapshot 结构与 Git commit 概念类似，有 parent-child 层级。
-	•	每个 snapshot 的关系和元信息都记录在 metadata.db 中，由 containerd 自动维护。
 
-⸻
+```
+/var/lib/containerd/io.containerd.snapshotter.v1.overlayfs/
+├── snapshots
+│   ├── 1  # Snapshot ID for the first layer
+│   │   └── fs  # Contains the filesystem for that layer
+│   ├── 2  # Snapshot ID for the second layer
+│   │   └── fs  # Contains the filesystem for that layer
+│   └── 3 # Snapshot ID for the writable layer of the container
+│       └── fs  # Contains the filesystem for the writable layer
+└── mounts
+    └── <mount-id>  #A unique ID for each mount, usually associated with a running container.
+        └── mount  # This directory is the mount point for the overlayfs filesystem.
+```
 
 #### opts 
 
