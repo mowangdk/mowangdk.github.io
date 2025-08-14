@@ -25,6 +25,8 @@ categories: weeklyreport
 
   RAG 其实是上下文工程(context engineering)中的一个技术
 - 
+经历了些波折，算是过了吧
+
 # 社区
 ### volume attach fast failed
 https://github.com/kubernetes/kubernetes/pull/132933/files
@@ -32,13 +34,17 @@ https://github.com/torredil/website/blob/552c5311d134da90f3a45cc54db5216361b00a4
 
 When a volume attachment operation fails due to a ResourceExhausted error (gRPC code 8), Kubernetes immediately updates the allocatable count instead of waiting for the next periodic update. The Kubelet then marks the affected pods as Failed, enabling their controllers to recreate them. This prevents pods from getting permanently stuck in the ContainerCreating state.
 
+the pod cleanup process is independent of the feature gate and its part of the Kubelet state machine. The feature gate simply controls whether we check for and react to ResourceExhausted errors (by transitioning pods to a terminal, Failed state in SyncPod). Note that VerifyExhaustedResource will only return true iff both the CSI plugin has opted in to this feature && attachment.Status.AttachError.ErrorCode == codes.ResourceExhausted (which the external-attacher is responsible for patching in the VA, and it only does so if the feature gate is enabled).Cleanup / teardown is performed in SyncTerminatedPod (the reverse of SyncPod).
+
+变更是在 WaitForAttachAndMount 方法里面实际判断的，开启了 featuegate 才会在 WaitForAttachAndMount 方法外侧返回
+
 ### DisruptionTarget
 
 其实某种情况下跟上面相关, 如果给pod 打上了这个DisruptionTarget 可以触发kubelet 自动回收资源，并且标记 pod 为 Failed
 
 DisruptionTarget: the pod is about to be terminated due to a disruption (such as preemption, eviction or garbage-collection).
 
-btw， 这次确认了下， 不能把 pod 直接标记为 Failed， 因为节点上的流程需要有机制回收，如果 controller 直接标记会跳过 kubelet 回收流程，上述代码里面通过直接更新node 的 condition 中的代码是因为如下逻辑会自动触发pod 删除流程
+btw， 这次确认了下， 不能把 pod 直接标记为 Failed， 因为节点上的流程需要有机制回收，如果 controller 直接标记会跳过 kubelet 回收流程，上述代码里面通过直接更新 node 的 condition 中的代码是因为如下逻辑会自动触发pod 删除流程
 ```golang
 					// Return error to the kubelet, which will then trigger the pod termination logic.
 					return &VolumeAttachLimitExceededError{
