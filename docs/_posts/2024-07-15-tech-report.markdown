@@ -21,6 +21,18 @@ categories: weeklyreport
 AI对于基础设施的workload主要以东西向流量和南北向流量为主，东西向更多的是GPU-to-GPU，而南北向则重点是GPU-to-Storage，也是关注的重点。
 在训练过程中对于存储最主要的诉求是dataset的读取诉求以及checkpoint写入读取。这两种请求的IO模型差异是比较大的。AI模型的类型和数据样本的大小决定了训练时候的性能差异。
 
+AI 存储数据特性
+训练
+- 数据集
+  - 并发读取
+- checkpoint
+  - 多路并发写入
+  - 大块顺序读取
+推理
+- 模型
+  - 随机读取
+- kv-cache
+  - 当使用性能较低的 GPU 卡型的时候， 相关推理的数据存储在 GPU 的内存中可以显著提升效率，通过硬件进行进一步压缩的 token 可以减少传输数据量和使用量
 
 ### xattr
 
@@ -40,6 +52,13 @@ setfattr -x user.comment example.txt # remove
 getfattr -d example.txt # verify remove
 ```
 
+---2025-09-13 22:30:08 +0800 addon
+we can know that xattr has four types, specified in the fully qualified namespace.attribute base on https://man7.org/linux/man-pages/man7/xattr.7.html
+
+- user.mime_type
+- trusted.md5sum
+- system.posix_acl_access
+- security.selinux
 
 # 工作
 
